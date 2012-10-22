@@ -1,7 +1,7 @@
+package src;
 import java.util.ArrayList;
 
 public class TestServerAccessor {
-	private final ArrayList<String> userlist1 = new ArrayList<String>();
 	private final ServerAccessor sa;
 	private final ArrayList<String> emptyArrayList = new ArrayList<String>();
 
@@ -13,7 +13,8 @@ public class TestServerAccessor {
 
 	public static void main(String[] args) {
 		TestServerAccessor test = new TestServerAccessor();
-		test.setters();
+		test.requests();
+		test.received();
 
 		test.summarize();
 
@@ -25,7 +26,8 @@ public class TestServerAccessor {
 				" tests.");
 	}
 
-	private void setters() {
+	private void requests() {
+		final ArrayList<String> userlist1 = new ArrayList<String>();
 		userlist1.add("user1");
 		userlist1.add("user2");
 		userlist1.add("user3");
@@ -45,15 +47,57 @@ public class TestServerAccessor {
 			ArrayList<String> toAdd = new ArrayList<String>();
 			toAdd.add("user4");
 			toAdd.add("user5");
-			sa.addRequests("user1", toAdd);
+			sa.addRequestList("user1", toAdd);
 			// testing adding and getting multiple requests
 			assertTrue("arrayListAddMultiple",
 					sa.arrayListToString(sa.getRequests("user1")).equals(
 							"user2,user3,user4,user5,"));
+			
+			sa.removeRequest("user1", "user2");
+			assertFalse("arrayListRemove1",
+					sa.getRequests("user1").contains("user2"));
+			sa.removeRequest("user1", "user3");
+			assertFalse("arrayListRemove2",
+					sa.getRequests("user1").contains("user3"));
 
 		}
 		catch(Exception e) {
-			System.out.println("Exception thrown during setters tests:");
+			System.out.println("Exception thrown during requests tests:");
+			System.out.println(e);
+			sa.clear(); //clear the keys and values
+			assertTrue("setters", false);
+		}
+	}
+	
+	private void received() {
+		final ArrayList<String> userlist2 = new ArrayList<String>();
+		userlist2.add("user2");
+		userlist2.add("user3");
+		userlist2.add("user4");
+
+		try {
+			sa.addReceived("user1", "user2");
+			assertTrue("addReceived1",
+					sa.getReceived("user1").contains("user2"));
+			
+			sa.addReceived("user1", "user3");
+			assertTrue("addReceived2",
+					sa.getReceived("user1").contains("user2") &&
+					sa.getReceived("user1").contains("user3"));
+			sa.clear();
+			
+			sa.addReceivedList("user1", userlist2);
+			ArrayList<String> user1Recs = sa.getReceived("user1");
+			int count = 0;
+			for (String user : userlist2) {
+				assertTrue("addAllReceived1" + count,
+						user1Recs.contains(user));
+				count++;
+			}
+
+		}
+		catch(Exception e) {
+			System.out.println("Exception thrown during received tests:");
 			System.out.println(e);
 			assertTrue("setters", false);
 		}

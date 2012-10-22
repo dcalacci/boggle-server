@@ -1,3 +1,4 @@
+package src;
 import java.util.*;
 //go_ogle_me
 //googleme
@@ -101,15 +102,64 @@ public class ServerAccessor {
    * @param user The user to add requests to
    * @param reqsToAdd The list of Strings that represents all the requests to add
    */
-  public void addRequests(String user, ArrayList<String> reqsToAdd) {
+  public void addRequestList(String user, ArrayList<String> reqsToAdd) {
     ArrayList<String> reqs = this.getRequests(user);
     reqs.addAll(reqsToAdd);
     String key = "req_" + user;
     String val = this.arrayListToString(reqs);
     this.put(key, val);
   }
+  
+  /**
+   * Removes the given request from the given users' request list
+   * @param user 	The user whose request list we're removing stuff from
+   * @param req 	The user request we're removing
+   */
+  public void removeRequest(String user, String req) {
+	  String key = "req_" + user;
+	  ArrayList<String> curReqs = this.getRequests(key);
+	  curReqs.remove(req);
+	  String val = this.arrayListToString(curReqs);
+	  this.put(key, val);
+  }
 
   // Received
 
+  /**
+   * Adds user rec to user1's recieved list
+   * @param user  The user whose recieved list we're editing
+   * @param rec   The user to add to users's recieved list
+   */
+  public void addReceived(String user, String rec) {
+    String key = "rec_" + user;
+    ArrayList<String> recs = this.stringToArrayList(this.get(key));
+    recs.add(rec);
+    String val = this.arrayListToString(recs);
+    this.put(key, val);
+  }
+  
+  /**
+   * Returns a list of the given users' received requests
+   * @param user	The user whose requests we're returning
+   * @return 		The list of users' received requests 
+   */
+  public ArrayList<String> getReceived(String user) {
+    String key = "rec_" + user;
+    ArrayList<String> recs = this.stringToArrayList(this.get(key));
+    return recs;
+  }
+  
+  /**
+   * Adds all users in the list to the given users' received list
+   * @param user 	The user whose received list we're editing
+   * @param recs 	The list of requests to add
+   */
+  public void addReceivedList(String user, ArrayList<String> recs) {
+	  String key = "rec_" + user;
+	  ArrayList<String> curRecs = this.stringToArrayList(this.get(key));
+	  curRecs.addAll(recs);
+	  String val = this.arrayListToString(curRecs);
+	  this.put(key, val);
+  }
 
 }
