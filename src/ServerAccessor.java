@@ -9,6 +9,8 @@ import edu.neu.mobileclass.apis.KeyValueAPI;
 public class ServerAccessor {
   private static final String TEAM_NAME = "go_ogle_me";
   private static final String PASSWORD  = "googleme";
+  private static String USER_NAME = "";
+  private static String USER_PASS = "";
 
   public ServerAccessor() {}
 
@@ -58,15 +60,15 @@ public class ServerAccessor {
   public String arrayListToString(ArrayList<String> users) {
     StringBuilder builder = new StringBuilder();
     for (String user : users) {
-    	if (!user.equals("")) {
-    		builder.append(user + ",");
-    	}
+      if (!user.equals("")) {
+        builder.append(user + ",");
+      }
     }
     return builder.toString();
   }
 
   public ArrayList<String> stringToArrayList(String strUsers) {
-	ArrayList<String> users = new ArrayList<String>(Arrays.asList(strUsers.split(",")));
+  ArrayList<String> users = new ArrayList<String>(Arrays.asList(strUsers.split(",")));
     return users;
   }
 
@@ -112,15 +114,15 @@ public class ServerAccessor {
   
   /**
    * Removes the given request from the given users' request list
-   * @param user 	The user whose request list we're removing stuff from
-   * @param req 	The user request we're removing
+   * @param user  The user whose request list we're removing stuff from
+   * @param req   The user request we're removing
    */
   public void removeRequest(String user, String req) {
-	  String key = "req_" + user;
-	  ArrayList<String> curReqs = this.getRequests(key);
-	  curReqs.remove(req);
-	  String val = this.arrayListToString(curReqs);
-	  this.put(key, val);
+    String key = "req_" + user;
+    ArrayList<String> curReqs = this.getRequests(key);
+    curReqs.remove(req);
+    String val = this.arrayListToString(curReqs);
+    this.put(key, val);
   }
 
   // Received
@@ -140,8 +142,8 @@ public class ServerAccessor {
   
   /**
    * Returns a list of the given users' received requests
-   * @param user	The user whose requests we're returning
-   * @return 		The list of users' received requests 
+   * @param user  The user whose requests we're returning
+   * @return    The list of users' received requests 
    */
   public ArrayList<String> getReceived(String user) {
     String key = "rec_" + user;
@@ -151,15 +153,93 @@ public class ServerAccessor {
   
   /**
    * Adds all users in the list to the given users' received list
-   * @param user 	The user whose received list we're editing
-   * @param recs 	The list of requests to add
+   * @param user  The user whose received list we're editing
+   * @param recs  The list of requests to add
    */
   public void addReceivedList(String user, ArrayList<String> recs) {
-	  String key = "rec_" + user;
-	  ArrayList<String> curRecs = this.stringToArrayList(this.get(key));
-	  curRecs.addAll(recs);
-	  String val = this.arrayListToString(curRecs);
-	  this.put(key, val);
+    String key = "rec_" + user;
+    ArrayList<String> curRecs = this.stringToArrayList(this.get(key));
+    curRecs.addAll(recs);
+    String val = this.arrayListToString(curRecs);
+    this.put(key, val);
   }
 
+  /**
+   * Removes rec from the given users' list of received requests
+   * @param user  The user whose received list we're editing
+   * @param rec   The received request we're removing
+   */
+  public void removeReceived(String user, String rec) {
+    String key = "rec_" + user;
+    ArrayList<String> curRecs = this.getReceived(user);
+    curRecs.remove(rec);
+    String val = this.arrayListToString(curRecs);
+    this.put(key, val);
+  }
+
+  /**
+   * Returns true if the given user/pass combination exists
+   * @param user  The given username
+   * @param pass  The given password
+   */
+  public boolean login(String user, String pass) {
+    String usersKey = "users";
+    String passKey = "pass_" + user;
+
+    String passVal = this.get(passKey);
+    ArrayList<String> users = stringToArrayList(this.get(usersKey));
+
+    if (users.contains(user) && pass.equals(passVal)) {
+      this.USER_NAME  = user;
+      this.PASSWORD   = pass;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Registers a new user
+   * This will only be called if the given user/pass is valid
+   * @param user  The new username to register
+   * @param pass  The password for the new username
+   */
+  public void register(String user, String pass) {
+    String usersKey = "users";
+    String passKey = "pass_" + user;
+
+    String passVal = pass;
+    this.put(passKey, passVal); // enters the new user/pass combo into the server
+
+    ArrayList<String> users = stringToArrayList(this.get(usersKey));
+    users.add(user); // adds the given username to the list of users
+    this.put(usersKey, this.arrayListToString(users)); // updates the list of users on the server
+  }
+
+  /**
+   * Checks to see if a new user/pass combo can be registered
+   * @param user  The username to check
+   * @param pass  The password to check
+   * @return true if the username/pass can be registered, false otherwise
+   */
+  public boolean canRegister(String user, String pass) {
+    // if the username or password contains commas, it can't be registered
+    if (user.contains(",") || pass.contains(",")) {
+      return false;
+    } else if (alreadyRegistered(user)) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+  /**
+   * Checks to see if the given username is already registered
+   * @param user  The username to check
+   * @return true if the username is already registered
+   */
+  public boolean alreadyRegistered(String user) {
+    String usersKey = "users";
+    ArrayList<String> users = stringToArrayList(this.get(usersKey));
+    return users.contains(user);
+  }
 }
