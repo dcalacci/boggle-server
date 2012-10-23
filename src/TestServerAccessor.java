@@ -16,6 +16,7 @@ public class TestServerAccessor {
     test.requests();
     test.received();
     test.login();
+    test.games();
 
     test.summarize();
 
@@ -109,28 +110,72 @@ public class TestServerAccessor {
   }
 
   private void login() {
-    String user1 = "user1";
-    String pass1 = "suspension1";
-    String user2 = "user2";
-    String pass2 = "suspension2";
-    String user3 = "user3";
-    String pass3 = "suspension,3";
+    try {
+      String user1 = "user1";
+      String pass1 = "suspension1";
+      String user2 = "user2";
+      String pass2 = "suspension2";
+      String user3 = "user3";
+      String pass3 = "suspension,3";
 
-    sa.clear();
-    assertTrue("canRegister1",
-        sa.canRegister(user1, pass1));
-    sa.register(user1, pass1);
-    assertTrue("canRegister2",
-        sa.canRegister(user2, pass2));
-    sa.register(user2, pass2);
-    assertFalse("canRegister3",
-        sa.canRegister(user1, pass2));
-    assertFalse("canRegister4",
-        sa.canRegister(user3, pass3));
-    assertTrue("alreadyRegistered1",
-        sa.alreadyRegistered(user1));
-    assertFalse("alreadyRegistered2",
-        sa.alreadyRegistered(user3));
+      sa.clear();
+      assertTrue("canRegister1",
+          sa.canRegister(user1, pass1));
+      sa.register(user1, pass1);
+      assertTrue("canRegister2",
+          sa.canRegister(user2, pass2));
+      sa.register(user2, pass2);
+      assertFalse("canRegister3",
+          sa.canRegister(user1, pass2));
+      assertFalse("canRegister4",
+          sa.canRegister(user3, pass3));
+      assertTrue("alreadyRegistered1",
+          sa.alreadyRegistered(user1));
+      assertFalse("alreadyRegistered2",
+          sa.alreadyRegistered(user3));
+      sa.clear();
+    } catch(Exception e) {
+      System.out.println("Exception thrown during login tests:");
+      System.out.println(e);
+      assertTrue("login", false);
+    }
+  }
+
+  private void games() {
+    try {
+      String user1 = "user1";
+      String user2 = "user2";
+      String user3 = "user3";
+      String user4 = "user4";
+
+      sa.clear();
+      sa.register(user1, "pass");
+      sa.register(user2, "pass");
+      sa.register(user3, "pass");
+      sa.register(user4, "pass");
+
+      sa.addGame(user1, user2);
+      assertTrue("doesGameExist1",
+          sa.doesGameExist(user1, user2));
+      assertFalse("doesGameExist2",
+          sa.doesGameExist(user1, user3));
+      assertFalse("doesGameExist3",
+          sa.doesGameExist(user2, user3));
+      assertTrue("doesGameExist4",
+          sa.doesGameExist(user2, user1));
+      sa.addGame(user1, user3);
+      assertTrue("doesGameExist5",
+          sa.doesGameExist(user1, user3));
+      assertTrue("getGames1",
+          sa.getGames(user1).contains(user3) &&
+          sa.getGames(user1).contains(user2));
+      assertFalse("getGames2",
+          sa.getGames(user1).contains(user4));
+    } catch(Exception e) {
+      System.out.println("Exception thrown during games tests:");
+      System.out.println(e);
+      assertTrue("games", false);
+    }
   }
 
 

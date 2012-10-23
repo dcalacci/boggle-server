@@ -242,4 +242,67 @@ public class ServerAccessor {
     ArrayList<String> users = stringToArrayList(this.get(usersKey));
     return users.contains(user);
   }
+
+  /**
+   * Returns the key for the given two users - order unspecific
+   * I recognize that this does not generate a very unique
+   * key, but it needs to be an int and we have a very small use case.
+   * @param user1   The first user
+   * @param user2   The second user
+   * @return        An integer value that is the key value for the two users
+   */
+  private String getUsersKey(String user1, String user2) {
+    // String.hashCode has used the same algorithm since java 1.3.1,
+    // so i'm comfortable using it here to generate a consistent "unique" identifier
+    // for the two given users
+    int hash1 = user1.hashCode();
+    int hash2 = user2.hashCode();
+    int key = hash1+hash2;
+    return "" + key;
+  }
+
+  /**
+   * Returns true if a game between the two users exists
+   * @param user1   The first user
+   * @param user2   The second user
+   * @return        True if a game exists, false otherwise
+   */
+  public boolean doesGameExist(String user1, String user2) {
+    String gameKey = "games";
+    // get the unique identifier for these two users
+    String thisGame = this.getUsersKey(user1, user2);
+    ArrayList<String> games = this.stringToArrayList(this.get(gameKey));
+    return games.contains(thisGame);
+  }
+
+  /**
+   * Adds a game between the two given users to the server
+   * @param user1   The first user
+   * @param user2   The second user
+   */
+  public void addGame(String user1, String user2) {
+    String gameKey = "games";
+    String usersKey = this.getUsersKey(user1, user2);
+    ArrayList<String> games = this.stringToArrayList(this.get(gameKey));
+    games.add(usersKey);
+    String gameVal = this.arrayListToString(games);
+    this.put(gameKey, gameVal);
+  }
+
+  /**
+   * Produces an arraylist of all the users that user has games with
+   * @param user  The user who we are concerned with
+   * @return      An arraylist that contains every user that user is in a game with
+   */
+  public ArrayList<String> getGames(String user) {
+    ArrayList<String> serverGames = this.stringToArrayList(this.get("games"));
+    ArrayList<String> serverUsers = this.stringToArrayList(this.get("users"));
+    ArrayList<String> games = new ArrayList<String>();
+    for (String user2 : serverUsers) {
+      if (serverGames.contains(this.getUsersKey(user, user2))) {
+        games.add(user2);
+      }
+    }
+    return games;
+  }
 }
