@@ -305,4 +305,53 @@ public class ServerAccessor {
     }
     return games;
   }
+  // only called when a previous game doesn't exist
+  public void createNewGame(String creator, String opponent, String board) {
+    String userskey = this.getUsersKey(creator, opponent);
+
+    // add game to game list
+    this.addGame(creator, opponent);
+
+    // add board to the server
+    String boardKey = "board_" + userskey;
+    this.put(boardKey, board); // create the board on the server
+
+    // value of turn element will always be a username - initiates to the creator.
+    String turnKey = "turn_" + userskey;
+    this.put(turnKey, creator); // create the turn element on the server
+
+    // create the entered words element on the server
+    String enteredKey = "entered_" + userskey;
+    this.put(enteredKey, "");
+
+    // create the scores element on the server
+    // score is a string like "user1|50,user2|44"
+    String scoresKey = "scores_" + userskey;
+    this.put(scoresKey, creator + "|0," + opponent + "|0");
+
+    // create the number of turns element on the server
+    String numTurnsKey = "numTurns_" + userskey;
+    this.put(numTurnsKey, "0");
+  }
+
+// TODO: create a scores interpreter
+// TODO: create a numTurns interpreter
+// TODO: create a board interpreter
+// TODO: create an enteredKey interpreter
+// TODO: make a (makeTurn) method that takes in a users' name, a new board,
+//        the user they're playing against, that users' updated score, and
+//        the updated entered word list....or if we choose to store everything 
+//        on the server, the word that the user just entered(might be cleaner).
+//        turn_... should update itself.
+
+
+  
+
+
+  public void updateBoard(String user1, String user2, String board) {
+    String boardKey = "board_" + this.getUsersKey(user1, user2);
+    String boardVal = board;
+    this.put(boardKey, boardVal);
+  }
+
 }
